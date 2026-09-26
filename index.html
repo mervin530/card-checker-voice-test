@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Card Checker Voice Test</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f5f6f8;
+      color: #202124;
+    }
+
+    .page {
+      max-width: 520px;
+      margin: auto;
+      padding: 24px 18px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .mic {
+      display: block;
+      width: 160px;
+      height: 160px;
+      margin: 25px auto;
+      border: none;
+      border-radius: 50%;
+      background: #1976d2;
+      color: white;
+      font-size: 64px;
+      cursor: pointer;
+    }
+
+    .mic.listening {
+      background: #d32f2f;
+    }
+
+    #status {
+      text-align: center;
+      font-weight: bold;
+      min-height: 30px;
+    }
+
+    .result {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 25px;
+      min-height: 100px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .label {
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 8px;
+    }
+
+    #speechText {
+      font-size: 22px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .hint {
+      margin-top: 25px;
+      padding: 16px;
+      background: #fff;
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <h1>🎤 Voice Test</h1>
+
+  <div class="subtitle">
+    Card Checker
+  </div>
+
+  <button
+    id="micButton"
+    class="mic"
+    type="button"
+  >
+    🎤
+  </button>
+
+  <div id="status">
+    Tap the microphone
+  </div>
+
+  <div class="result">
+
+    <div class="label">
+      PHONE HEARD:
+    </div>
+
+    <div id="speechText">
+      —
+    </div>
+
+  </div>
+
+  <div class="hint">
+    Try saying:<br><br>
+
+    <strong>
+      Costco, 52 dollars and 80 cents, food card
+    </strong>
+  </div>
+
+</div>
+
+
+<script>
+
+const SpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+const micButton =
+  document.getElementById('micButton');
+
+const status =
+  document.getElementById('status');
+
+const speechText =
+  document.getElementById('speechText');
+
+
+if (!SpeechRecognition) {
+
+  status.textContent =
+    'Speech recognition is not supported in this browser.';
+
+  micButton.disabled = true;
+
+} else {
+
+  const recognition =
+    new SpeechRecognition();
+
+  recognition.lang =
+    'en-CA';
+
+  recognition.interimResults =
+    false;
+
+  recognition.continuous =
+    false;
+
+  recognition.maxAlternatives =
+    1;
+
+
+  micButton.addEventListener(
+    'click',
+    function() {
+
+      speechText.textContent =
+        '—';
+
+      status.textContent =
+        'Listening...';
+
+      micButton.classList.add(
+        'listening'
+      );
+
+      try {
+        recognition.start();
+      } catch (error) {
+        status.textContent =
+          'Could not start microphone: ' +
+          error.message;
+      }
+
+    }
+  );
+
+
+  recognition.onresult =
+    function(event) {
+
+      const transcript =
+        event.results[0][0].transcript;
+
+      speechText.textContent =
+        transcript;
+
+      status.textContent =
+        '✓ Heard successfully';
+
+    };
+
+
+  recognition.onerror =
+    function(event) {
+
+      status.textContent =
+        'Microphone error: ' +
+        event.error;
+
+    };
+
+
+  recognition.onend =
+    function() {
+
+      micButton.classList.remove(
+        'listening'
+      );
+
+      if (
+        status.textContent ===
+        'Listening...'
+      ) {
+        status.textContent =
+          'Finished listening';
+      }
+
+    };
+
+}
+
+</script>
+
+</body>
+</html>
