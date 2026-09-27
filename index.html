@@ -8,9 +8,13 @@
     content="width=device-width, initial-scale=1"
   >
 
-  <title>Card Checker Voice Test</title>
+  <title>Card Checker Voice Entry</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -21,30 +25,30 @@
     .page {
       max-width: 520px;
       margin: auto;
-      padding: 24px 18px;
+      padding: 24px 18px 50px;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 8px;
+      margin: 5px 0 5px;
     }
 
     .subtitle {
       text-align: center;
       color: #666;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
 
     .mic {
       display: block;
-      width: 160px;
-      height: 160px;
-      margin: 25px auto;
+      width: 150px;
+      height: 150px;
+      margin: 20px auto;
       border: none;
       border-radius: 50%;
       background: #1976d2;
       color: white;
-      font-size: 64px;
+      font-size: 60px;
       cursor: pointer;
     }
 
@@ -56,33 +60,78 @@
       text-align: center;
       font-weight: bold;
       min-height: 30px;
+      margin-bottom: 20px;
     }
 
-    .result {
+    .card {
       background: white;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 20px;
-      margin-top: 25px;
-      min-height: 100px;
+      margin-top: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
 
     .label {
-      font-size: 13px;
+      font-size: 12px;
       color: #777;
-      margin-bottom: 8px;
+      text-transform: uppercase;
+      margin-bottom: 7px;
     }
 
     #speechText {
-      font-size: 22px;
+      font-size: 19px;
       line-height: 1.4;
-      word-break: break-word;
+    }
+
+    .details {
+      display: none;
+    }
+
+    .row {
+      padding: 13px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .row:last-child {
+      border-bottom: none;
+    }
+
+    .field-label {
+      color: #777;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .field-value {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .amount {
+      font-size: 32px;
+    }
+
+    .warning {
+      color: #b3261e;
+    }
+
+    .confirm {
+      display: none;
+      width: 100%;
+      margin-top: 20px;
+      padding: 17px;
+      border: none;
+      border-radius: 12px;
+      background: #188038;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
     }
 
     .hint {
-      margin-top: 25px;
+      margin-top: 22px;
       padding: 16px;
-      background: #fff;
+      background: white;
       border-radius: 12px;
       font-size: 15px;
       line-height: 1.5;
@@ -94,7 +143,7 @@
 
 <div class="page">
 
-  <h1>🎤 Voice Test</h1>
+  <h1>🎤 Voice Entry</h1>
 
   <div class="subtitle">
     Card Checker
@@ -112,10 +161,11 @@
     Tap the microphone
   </div>
 
-  <div class="result">
+
+  <div class="card">
 
     <div class="label">
-      PHONE HEARD:
+      PHONE HEARD
     </div>
 
     <div id="speechText">
@@ -124,12 +174,111 @@
 
   </div>
 
+
+  <div
+    id="details"
+    class="card details"
+  >
+
+    <div class="row">
+      <div class="field-label">
+        Vendor
+      </div>
+
+      <div
+        id="vendor"
+        class="field-value"
+      >
+        —
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="field-label">
+        Amount
+      </div>
+
+      <div
+        id="amount"
+        class="field-value amount"
+      >
+        —
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="field-label">
+        Date
+      </div>
+
+      <div
+        id="date"
+        class="field-value"
+      >
+        —
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="field-label">
+        Type
+      </div>
+
+      <div
+        id="type"
+        class="field-value"
+      >
+        —
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="field-label">
+        Card
+      </div>
+
+      <div
+        id="card"
+        class="field-value"
+      >
+        —
+      </div>
+    </div>
+
+  </div>
+
+
+  <button
+    id="confirmButton"
+    class="confirm"
+    type="button"
+  >
+    ✓ Confirm & Save
+  </button>
+
+
   <div class="hint">
+
     Try saying:<br><br>
 
     <strong>
-      Costco, 52 dollars and 80 cents, food card
+      Costco, $52.80, food card
     </strong>
+
+    <br><br>
+
+    or
+
+    <br><br>
+
+    <strong>
+      Refund $25 from Costco, food card
+    </strong>
+
   </div>
 
 </div>
@@ -137,9 +286,14 @@
 
 <script>
 
+/************************************************************
+ * SPEECH RECOGNITION
+ ************************************************************/
+
 const SpeechRecognition =
   window.SpeechRecognition ||
   window.webkitSpeechRecognition;
+
 
 const micButton =
   document.getElementById('micButton');
@@ -149,6 +303,12 @@ const status =
 
 const speechText =
   document.getElementById('speechText');
+
+const details =
+  document.getElementById('details');
+
+const confirmButton =
+  document.getElementById('confirmButton');
 
 
 if (!SpeechRecognition) {
@@ -183,6 +343,12 @@ if (!SpeechRecognition) {
       speechText.textContent =
         '—';
 
+      details.style.display =
+        'none';
+
+      confirmButton.style.display =
+        'none';
+
       status.textContent =
         'Listening...';
 
@@ -191,11 +357,15 @@ if (!SpeechRecognition) {
       );
 
       try {
+
         recognition.start();
+
       } catch (error) {
+
         status.textContent =
           'Could not start microphone: ' +
           error.message;
+
       }
 
     }
@@ -211,8 +381,9 @@ if (!SpeechRecognition) {
       speechText.textContent =
         transcript;
 
-      status.textContent =
-        '✓ Heard successfully';
+      parseVoiceEntry(
+        transcript
+      );
 
     };
 
@@ -234,17 +405,343 @@ if (!SpeechRecognition) {
         'listening'
       );
 
-      if (
-        status.textContent ===
-        'Listening...'
-      ) {
-        status.textContent =
-          'Finished listening';
-      }
-
     };
 
 }
+
+
+/************************************************************
+ * PARSE VOICE ENTRY
+ ************************************************************/
+
+function parseVoiceEntry(transcript) {
+
+  const original =
+    String(transcript || '').trim();
+
+  const text =
+    original.toLowerCase();
+
+
+  /**********************************************************
+   * TRANSACTION TYPE
+   **********************************************************/
+
+  let transactionType =
+    'PURCHASE';
+
+  if (
+    text.includes('refund') ||
+    text.includes('return')
+  ) {
+    transactionType =
+      'REFUND';
+  }
+
+
+  /**********************************************************
+   * CARD
+   **********************************************************/
+
+  let cardLast4 =
+    '';
+
+  let cardName =
+    'Not recognized';
+
+
+  if (
+    text.includes('food card') ||
+    text.includes('food mastercard') ||
+    text.includes('9726')
+  ) {
+
+    cardLast4 =
+      '9726';
+
+    cardName =
+      'Food ••••9726';
+
+  }
+
+  else if (
+    text.includes('mastercard') ||
+    text.includes('main card') ||
+    text.includes('3336')
+  ) {
+
+    cardLast4 =
+      '3336';
+
+    cardName =
+      'Costco Mastercard ••••3336';
+
+  }
+
+
+  /**********************************************************
+   * AMOUNT
+   *
+   * Handles:
+   * $52.80
+   * 52.80
+   * $25
+   **********************************************************/
+
+  let amount =
+    null;
+
+  const moneyMatch =
+    original.match(
+      /\$\s*([0-9]+(?:\.[0-9]{1,2})?)/
+    );
+
+  if (moneyMatch) {
+
+    amount =
+      Number(
+        moneyMatch[1]
+      );
+
+  } else {
+
+    const decimalMatch =
+      original.match(
+        /\b([0-9]+\.[0-9]{1,2})\b/
+      );
+
+    if (decimalMatch) {
+
+      amount =
+        Number(
+          decimalMatch[1]
+        );
+
+    }
+
+  }
+
+
+  /**********************************************************
+   * DATE
+   *
+   * Version 1:
+   * Default to today.
+   **********************************************************/
+
+  const today =
+    new Date();
+
+  const year =
+    today.getFullYear();
+
+  const month =
+    String(
+      today.getMonth() + 1
+    ).padStart(2, '0');
+
+  const day =
+    String(
+      today.getDate()
+    ).padStart(2, '0');
+
+  const purchaseDate =
+    year +
+    '-' +
+    month +
+    '-' +
+    day;
+
+
+  /**********************************************************
+   * VENDOR
+   **********************************************************/
+
+  let vendor =
+    original;
+
+  vendor =
+    vendor.replace(
+      /\$\s*[0-9]+(?:\.[0-9]{1,2})?/g,
+      ''
+    );
+
+  vendor =
+    vendor.replace(
+      /\b(refund|return|purchase|bought|paid|at|from)\b/gi,
+      ' '
+    );
+
+  vendor =
+    vendor.replace(
+      /\b(food card|food mastercard|main card|mastercard)\b/gi,
+      ' '
+    );
+
+  vendor =
+    vendor.replace(
+      /\b(9726|3336)\b/g,
+      ' '
+    );
+
+  vendor =
+    vendor.replace(
+      /[,]+/g,
+      ' '
+    );
+
+  vendor =
+    vendor.replace(
+      /\s+/g,
+      ' '
+    ).trim();
+
+
+  /**********************************************************
+   * CAPITALIZE VENDOR
+   **********************************************************/
+
+  if (vendor) {
+
+    vendor =
+      vendor
+        .split(' ')
+        .map(function(word) {
+
+          if (!word) {
+            return '';
+          }
+
+          return (
+            word.charAt(0).toUpperCase() +
+            word.slice(1)
+          );
+
+        })
+        .join(' ');
+
+  }
+
+
+  /**********************************************************
+   * DISPLAY RESULT
+   **********************************************************/
+
+  document
+    .getElementById('vendor')
+    .textContent =
+      vendor || 'Not recognized';
+
+
+  document
+    .getElementById('amount')
+    .textContent =
+      amount !== null
+        ? '$' + amount.toFixed(2)
+        : 'Not recognized';
+
+
+  document
+    .getElementById('date')
+    .textContent =
+      purchaseDate;
+
+
+  document
+    .getElementById('type')
+    .textContent =
+      transactionType;
+
+
+  document
+    .getElementById('card')
+    .textContent =
+      cardName;
+
+
+  details.style.display =
+    'block';
+
+
+  /**********************************************************
+   * VALIDATION
+   **********************************************************/
+
+  const valid =
+    vendor &&
+    amount !== null &&
+    amount > 0 &&
+    cardLast4;
+
+
+  if (valid) {
+
+    status.textContent =
+      '✓ Ready to confirm';
+
+    confirmButton.style.display =
+      'block';
+
+  } else {
+
+    status.textContent =
+      '⚠ Some information was not recognized';
+
+    confirmButton.style.display =
+      'none';
+
+  }
+
+
+  /**********************************************************
+   * TEST DATA
+   *
+   * We are NOT sending this anywhere yet.
+   **********************************************************/
+
+  window.voiceEntryTest = {
+
+    purchaseDate:
+      purchaseDate,
+
+    vendor:
+      vendor,
+
+    amount:
+      amount,
+
+    transactionType:
+      transactionType,
+
+    cardLast4:
+      cardLast4
+
+  };
+
+}
+
+
+/************************************************************
+ * CONFIRM BUTTON
+ *
+ * TEST ONLY.
+ * NOTHING IS SAVED.
+ ************************************************************/
+
+confirmButton.addEventListener(
+  'click',
+  function() {
+
+    status.textContent =
+      '✓ Test successful — nothing saved';
+
+    alert(
+      'Voice parsing works!\n\n' +
+      'Nothing has been saved yet.'
+    );
+
+  }
+);
 
 </script>
 
