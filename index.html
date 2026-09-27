@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -9,6 +11,7 @@
   >
 
   <title>Card Checker Voice Entry</title>
+
 
   <style>
 
@@ -112,10 +115,6 @@
       font-size: 32px;
     }
 
-    .warning {
-      color: #b3261e;
-    }
-
     .confirm {
       display: none;
       width: 100%;
@@ -127,6 +126,7 @@
       color: white;
       font-size: 20px;
       font-weight: bold;
+      cursor: pointer;
     }
 
     .confirm:disabled {
@@ -146,11 +146,17 @@
 
 </head>
 
+
 <body>
+
 
 <div class="page">
 
-  <h1>🎤 Voice Entry</h1>
+
+  <h1>
+    🎤 Voice Entry
+  </h1>
+
 
   <div class="subtitle">
     Card Checker
@@ -188,6 +194,7 @@
     id="details"
     class="card details"
   >
+
 
     <div class="row">
 
@@ -268,6 +275,7 @@
 
     </div>
 
+
   </div>
 
 
@@ -282,10 +290,24 @@
 
   <div class="hint">
 
-    Try saying:<br><br>
+    Try saying:
+
+    <br><br>
 
     <strong>
       Costco, $52.80, food card
+    </strong>
+
+    <br><br>
+
+    <strong>
+      Costco, $52.80, food card, yesterday
+    </strong>
+
+    <br><br>
+
+    <strong>
+      Costco, $52.80, food card, September 25
     </strong>
 
     <br><br>
@@ -295,15 +317,18 @@
     <br><br>
 
     <strong>
-      Refund $25 from Costco, food card
+      Refund $25 from Costco, food card, September 24
     </strong>
 
   </div>
 
+
 </div>
 
 
+
 <script>
+
 
 /************************************************************
  * SPEECH RECOGNITION
@@ -319,20 +344,24 @@ const micButton =
     'micButton'
   );
 
+
 const status =
   document.getElementById(
     'status'
   );
+
 
 const speechText =
   document.getElementById(
     'speechText'
   );
 
+
 const details =
   document.getElementById(
     'details'
   );
+
 
 const confirmButton =
   document.getElementById(
@@ -340,15 +369,20 @@ const confirmButton =
   );
 
 
+
 if (!SpeechRecognition) {
+
 
   status.textContent =
     'Speech recognition is not supported in this browser.';
 
+
   micButton.disabled =
     true;
 
+
 } else {
+
 
   const recognition =
     new SpeechRecognition();
@@ -357,31 +391,40 @@ if (!SpeechRecognition) {
   recognition.lang =
     'en-CA';
 
+
   recognition.interimResults =
     false;
+
 
   recognition.continuous =
     false;
 
+
   recognition.maxAlternatives =
     1;
+
 
 
   micButton.addEventListener(
     'click',
     function() {
 
+
       speechText.textContent =
         '—';
+
 
       details.style.display =
         'none';
 
+
       confirmButton.style.display =
         'none';
 
+
       status.textContent =
         'Listening...';
+
 
       micButton.classList.add(
         'listening'
@@ -390,22 +433,29 @@ if (!SpeechRecognition) {
 
       try {
 
+
         recognition.start();
 
+
       } catch (error) {
+
 
         status.textContent =
           'Could not start microphone: ' +
           error.message;
 
+
       }
+
 
     }
   );
 
 
+
   recognition.onresult =
     function(event) {
+
 
       const transcript =
         event.results[0][0].transcript;
@@ -419,29 +469,38 @@ if (!SpeechRecognition) {
         transcript
       );
 
+
     };
+
 
 
   recognition.onerror =
     function(event) {
 
+
       status.textContent =
         'Microphone error: ' +
         event.error;
 
+
     };
+
 
 
   recognition.onend =
     function() {
 
+
       micButton.classList.remove(
         'listening'
       );
 
+
     };
 
+
 }
+
 
 
 /************************************************************
@@ -452,6 +511,7 @@ function parseVoiceEntry(
   transcript
 ) {
 
+
   const original =
     String(
       transcript || ''
@@ -460,6 +520,7 @@ function parseVoiceEntry(
 
   const text =
     original.toLowerCase();
+
 
 
   /**********************************************************
@@ -475,10 +536,13 @@ function parseVoiceEntry(
     text.includes('return')
   ) {
 
+
     transactionType =
       'REFUND';
 
+
   }
+
 
 
   /**********************************************************
@@ -488,8 +552,10 @@ function parseVoiceEntry(
   let cardLast4 =
     '';
 
+
   let cardName =
     'Not recognized';
+
 
 
   if (
@@ -498,13 +564,17 @@ function parseVoiceEntry(
     text.includes('9726')
   ) {
 
+
     cardLast4 =
       '9726';
+
 
     cardName =
       'Food ••••9726';
 
+
   }
+
 
   else if (
     text.includes('mastercard') ||
@@ -512,13 +582,17 @@ function parseVoiceEntry(
     text.includes('3336')
   ) {
 
+
     cardLast4 =
       '3336';
+
 
     cardName =
       'Costco Mastercard ••••3336';
 
+
   }
+
 
 
   /**********************************************************
@@ -537,12 +611,15 @@ function parseVoiceEntry(
 
   if (moneyMatch) {
 
+
     amount =
       Number(
         moneyMatch[1]
       );
 
+
   } else {
+
 
     const decimalMatch =
       original.match(
@@ -552,54 +629,45 @@ function parseVoiceEntry(
 
     if (decimalMatch) {
 
+
       amount =
         Number(
           decimalMatch[1]
         );
 
+
     }
+
 
   }
 
 
+
   /**********************************************************
-   * DATE
+   * DATE RECOGNITION
    *
-   * Current version defaults to today.
+   * Supports:
+   *
+   * today
+   * yesterday
+   * September 25
+   * September 25th
+   * Sep 25
+   * September 25, 2026
+   *
+   * If no date is spoken:
+   * defaults to today.
    **********************************************************/
 
-  const today =
-    new Date();
-
-
-  const year =
-    today.getFullYear();
-
-
-  const month =
-    String(
-      today.getMonth() + 1
-    ).padStart(
-      2,
-      '0'
-    );
-
-
-  const day =
-    String(
-      today.getDate()
-    ).padStart(
-      2,
-      '0'
+  const dateResult =
+    parseSpokenDate(
+      original
     );
 
 
   const purchaseDate =
-    year +
-    '-' +
-    month +
-    '-' +
-    day;
+    dateResult.date;
+
 
 
   /**********************************************************
@@ -610,12 +678,22 @@ function parseVoiceEntry(
     original;
 
 
+
+  /**********************************************************
+   * REMOVE AMOUNT
+   **********************************************************/
+
   vendor =
     vendor.replace(
       /\$\s*[0-9]+(?:\.[0-9]{1,2})?/g,
-      ''
+      ' '
     );
 
+
+
+  /**********************************************************
+   * REMOVE TRANSACTION WORDS
+   **********************************************************/
 
   vendor =
     vendor.replace(
@@ -623,6 +701,11 @@ function parseVoiceEntry(
       ' '
     );
 
+
+
+  /**********************************************************
+   * REMOVE CARD WORDS
+   **********************************************************/
 
   vendor =
     vendor.replace(
@@ -638,6 +721,31 @@ function parseVoiceEntry(
     );
 
 
+
+  /**********************************************************
+   * REMOVE SPOKEN DATE
+   **********************************************************/
+
+  if (
+    dateResult.matchedText
+  ) {
+
+
+    vendor =
+      vendor.replace(
+        dateResult.matchedText,
+        ' '
+      );
+
+
+  }
+
+
+
+  /**********************************************************
+   * CLEAN VENDOR
+   **********************************************************/
+
   vendor =
     vendor.replace(
       /[,]+/g,
@@ -652,11 +760,13 @@ function parseVoiceEntry(
     ).trim();
 
 
+
   /**********************************************************
    * CAPITALIZE VENDOR
    **********************************************************/
 
   if (vendor) {
+
 
     vendor =
       vendor
@@ -664,20 +774,25 @@ function parseVoiceEntry(
         .map(
           function(word) {
 
+
             if (!word) {
               return '';
             }
+
 
             return (
               word.charAt(0).toUpperCase() +
               word.slice(1)
             );
 
+
           }
         )
         .join(' ');
 
+
   }
+
 
 
   /**********************************************************
@@ -693,6 +808,7 @@ function parseVoiceEntry(
       'Not recognized';
 
 
+
   document
     .getElementById(
       'amount'
@@ -704,12 +820,14 @@ function parseVoiceEntry(
         : 'Not recognized';
 
 
+
   document
     .getElementById(
       'date'
     )
     .textContent =
       purchaseDate;
+
 
 
   document
@@ -720,6 +838,7 @@ function parseVoiceEntry(
       transactionType;
 
 
+
   document
     .getElementById(
       'card'
@@ -728,8 +847,10 @@ function parseVoiceEntry(
       cardName;
 
 
+
   details.style.display =
     'block';
+
 
 
   /**********************************************************
@@ -740,26 +861,35 @@ function parseVoiceEntry(
     vendor &&
     amount !== null &&
     amount > 0 &&
-    cardLast4;
+    cardLast4 &&
+    purchaseDate;
+
 
 
   if (valid) {
 
+
     status.textContent =
       '✓ Ready to confirm';
+
 
     confirmButton.style.display =
       'block';
 
+
   } else {
+
 
     status.textContent =
       '⚠ Some information was not recognized';
 
+
     confirmButton.style.display =
       'none';
 
+
   }
+
 
 
   /**********************************************************
@@ -768,59 +898,359 @@ function parseVoiceEntry(
 
   window.voiceEntryTest = {
 
+
     purchaseDate:
       purchaseDate,
+
 
     vendor:
       vendor,
 
+
     amount:
       amount,
+
 
     transactionType:
       transactionType,
 
+
     cardLast4:
       cardLast4
 
+
   };
+
 
 }
 
 
+
 /************************************************************
- * CONFIRM
+ * SPOKEN DATE PARSER
+ ************************************************************/
+
+function parseSpokenDate(
+  transcript
+) {
+
+
+  const original =
+    String(
+      transcript || ''
+    );
+
+
+  const lower =
+    original.toLowerCase();
+
+
+
+  /**********************************************************
+   * TODAY
+   **********************************************************/
+
+  if (
+    /\btoday\b/i.test(
+      original
+    )
+  ) {
+
+
+    const date =
+      new Date();
+
+
+    return {
+      date:
+        formatLocalDate(
+          date
+        ),
+
+      matchedText:
+        /\btoday\b/i.exec(
+          original
+        )[0]
+    };
+
+
+  }
+
+
+
+  /**********************************************************
+   * YESTERDAY
+   **********************************************************/
+
+  if (
+    /\byesterday\b/i.test(
+      original
+    )
+  ) {
+
+
+    const date =
+      new Date();
+
+
+    date.setDate(
+      date.getDate() - 1
+    );
+
+
+    return {
+      date:
+        formatLocalDate(
+          date
+        ),
+
+      matchedText:
+        /\byesterday\b/i.exec(
+          original
+        )[0]
+    };
+
+
+  }
+
+
+
+  /**********************************************************
+   * MONTH NAMES
+   **********************************************************/
+
+  const months = {
+
+    january: 0,
+    jan: 0,
+
+    february: 1,
+    feb: 1,
+
+    march: 2,
+    mar: 2,
+
+    april: 3,
+    apr: 3,
+
+    may: 4,
+
+    june: 5,
+    jun: 5,
+
+    july: 6,
+    jul: 6,
+
+    august: 7,
+    aug: 7,
+
+    september: 8,
+    sept: 8,
+    sep: 8,
+
+    october: 9,
+    oct: 9,
+
+    november: 10,
+    nov: 10,
+
+    december: 11,
+    dec: 11
+
+  };
+
+
+
+  /**********************************************************
+   * EXAMPLE:
+   *
+   * September 25
+   * September 25th
+   * Sep 25
+   * September 25, 2026
+   **********************************************************/
+
+  const datePattern =
+    /\b(january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|september|sept|sep|october|oct|november|nov|december|dec)\s+([0-9]{1,2})(?:st|nd|rd|th)?(?:,\s*|\s+)?([0-9]{4})?\b/i;
+
+
+  const match =
+    original.match(
+      datePattern
+    );
+
+
+  if (match) {
+
+
+    const monthName =
+      match[1].toLowerCase();
+
+
+    const month =
+      months[
+        monthName
+      ];
+
+
+    const day =
+      Number(
+        match[2]
+      );
+
+
+    const today =
+      new Date();
+
+
+    const year =
+      match[3]
+        ? Number(
+            match[3]
+          )
+        : today.getFullYear();
+
+
+
+    /********************************************************
+     * VALIDATE DATE
+     ********************************************************/
+
+    const date =
+      new Date(
+        year,
+        month,
+        day
+      );
+
+
+    if (
+      date.getFullYear() === year &&
+      date.getMonth() === month &&
+      date.getDate() === day
+    ) {
+
+
+      return {
+
+        date:
+          formatLocalDate(
+            date
+          ),
+
+        matchedText:
+          match[0]
+
+      };
+
+
+    }
+
+
+  }
+
+
+
+  /**********************************************************
+   * DEFAULT TO TODAY
+   **********************************************************/
+
+  return {
+
+    date:
+      formatLocalDate(
+        new Date()
+      ),
+
+    matchedText:
+      ''
+
+  };
+
+
+}
+
+
+
+/************************************************************
+ * LOCAL DATE FORMATTER
  *
- * IMPORTANT:
- * The hidden form below is currently configured for
- * TEST_VOICE_PAYLOAD.
- *
- * Apps Script will receive and log the information,
- * but it WILL NOT save a Quick Entry.
+ * Avoids UTC date shifting on phones.
+ ************************************************************/
+
+function formatLocalDate(
+  date
+) {
+
+
+  const year =
+    date.getFullYear();
+
+
+  const month =
+    String(
+      date.getMonth() + 1
+    ).padStart(
+      2,
+      '0'
+    );
+
+
+  const day =
+    String(
+      date.getDate()
+    ).padStart(
+      2,
+      '0'
+    );
+
+
+  return (
+    year +
+    '-' +
+    month +
+    '-' +
+    day
+  );
+
+
+}
+
+
+
+/************************************************************
+ * CONFIRM & SAVE
  ************************************************************/
 
 confirmButton.addEventListener(
   'click',
   function() {
 
+
     const entry =
       window.voiceEntryTest;
+
 
 
     if (
       !entry ||
       !entry.vendor ||
       !entry.amount ||
-      !entry.cardLast4
+      !entry.cardLast4 ||
+      !entry.purchaseDate
     ) {
+
 
       alert(
         'Voice Entry information is incomplete.'
       );
 
+
       return;
 
+
     }
+
 
 
     /********************************************************
@@ -833,7 +1263,9 @@ confirmButton.addEventListener(
       );
 
 
+
     if (!pin) {
+
 
       pin =
         prompt(
@@ -855,7 +1287,9 @@ confirmButton.addEventListener(
         pin
       );
 
+
     }
+
 
 
     /********************************************************
@@ -870,12 +1304,14 @@ confirmButton.addEventListener(
         pin;
 
 
+
     document
       .getElementById(
         'voiceSaveDate'
       )
       .value =
         entry.purchaseDate;
+
 
 
     document
@@ -886,12 +1322,14 @@ confirmButton.addEventListener(
         entry.vendor;
 
 
+
     document
       .getElementById(
         'voiceSaveAmount'
       )
       .value =
         entry.amount;
+
 
 
     document
@@ -902,6 +1340,7 @@ confirmButton.addEventListener(
         entry.transactionType;
 
 
+
     document
       .getElementById(
         'voiceSaveCard'
@@ -910,16 +1349,18 @@ confirmButton.addEventListener(
         entry.cardLast4;
 
 
+
     /********************************************************
-     * SEND SAFE TEST
+     * SEND TO CARD CHECKER
      ********************************************************/
 
     status.textContent =
-      'Testing connection...';
+      'Saving...';
 
 
     confirmButton.disabled =
       true;
+
 
 
     document
@@ -929,51 +1370,63 @@ confirmButton.addEventListener(
       .submit();
 
 
+
+    /********************************************************
+     * CURRENT TEMPORARY CONFIRMATION
+     *
+     * Update 3 will replace this with a true backend
+     * confirmation containing QE number and match status.
+     ********************************************************/
+
     setTimeout(
       function() {
 
+
         status.textContent =
-          '✓ Test payload sent';
+          '✓ Entry sent to Card Checker';
+
 
         confirmButton.disabled =
           false;
 
 
+
         alert(
-          '✓ Test sent!\n\n' +
+          '✓ Voice Entry sent!\n\n' +
           entry.vendor +
           '\n$' +
           Number(
             entry.amount
           ).toFixed(2) +
+          '\n' +
+          entry.purchaseDate +
           '\n••••' +
-          entry.cardLast4 +
-          '\n\nNothing was saved.'
+          entry.cardLast4
         );
+
 
       },
       700
     );
 
+
   }
 );
+
 
 </script>
 
 
-<!--
-  CARD CHECKER VOICE FORM
 
-  TEMPORARY SAFE TEST MODE.
-  TEST_VOICE_PAYLOAD prevents saveQuickEntry()
-  from being called.
--->
+<!-- CARD CHECKER VOICE SAVE -->
+
 
 <iframe
   name="voiceSaveFrame"
   id="voiceSaveFrame"
   style="display:none;"
 ></iframe>
+
 
 
 <form
@@ -984,7 +1437,7 @@ confirmButton.addEventListener(
   style="display:none;"
 >
 
-  
+
   <input
     type="hidden"
     name="pin"
@@ -1026,7 +1479,10 @@ confirmButton.addEventListener(
     id="voiceSaveCard"
   >
 
+
 </form>
 
+
 </body>
+
 </html>
