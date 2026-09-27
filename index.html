@@ -722,121 +722,208 @@ function parseVoiceEntry(transcript) {
 
 
 /************************************************************
- * CONFIRM BUTTON
- *
- * TEST ONLY.
- * NOTHING IS SAVED.
+ * CONFIRM & SAVE
  ************************************************************/
 
 confirmButton.addEventListener(
   'click',
   function() {
 
-    status.textContent =
-      '✓ Test successful — nothing saved';
+    const entry =
+      window.voiceEntryTest;
 
-    alert(
-      'Voice parsing works!\n\n' +
-      'Nothing has been saved yet.'
+    if (
+      !entry ||
+      !entry.vendor ||
+      !entry.amount ||
+      !entry.cardLast4
+    ) {
+
+      alert(
+        'Voice Entry information is incomplete.'
+      );
+
+      return;
+    }
+
+
+    /********************************************************
+     * GET SAVED PIN OR ASK ON FIRST USE
+     ********************************************************/
+
+    let pin =
+      localStorage.getItem(
+        'cardCheckerVoicePin'
+      );
+
+
+    if (!pin) {
+
+      pin =
+        prompt(
+          'Enter your Voice Entry PIN:'
+        );
+
+      if (!pin) {
+        return;
+      }
+
+      pin =
+        pin.trim();
+
+      localStorage.setItem(
+        'cardCheckerVoicePin',
+        pin
+      );
+
+    }
+
+
+    /********************************************************
+     * COPY DATA INTO HIDDEN FORM
+     ********************************************************/
+
+    document
+      .getElementById(
+        'voiceSavePin'
+      )
+      .value =
+        pin;
+
+    document
+      .getElementById(
+        'voiceSaveDate'
+      )
+      .value =
+        entry.purchaseDate;
+
+    document
+      .getElementById(
+        'voiceSaveVendor'
+      )
+      .value =
+        entry.vendor;
+
+    document
+      .getElementById(
+        'voiceSaveAmount'
+      )
+      .value =
+        entry.amount;
+
+    document
+      .getElementById(
+        'voiceSaveType'
+      )
+      .value =
+        entry.transactionType;
+
+    document
+      .getElementById(
+        'voiceSaveCard'
+      )
+      .value =
+        entry.cardLast4;
+
+
+    /********************************************************
+     * SEND TO CARD CHECKER
+     ********************************************************/
+
+    status.textContent =
+      'Saving...';
+
+    confirmButton.disabled =
+      true;
+
+
+    document
+      .getElementById(
+        'voiceSaveForm'
+      )
+      .submit();
+
+
+    setTimeout(
+      function() {
+
+        status.textContent =
+          '✓ Entry sent to Card Checker';
+
+        confirmButton.disabled =
+          false;
+
+        alert(
+          '✓ Voice Entry sent!\n\n' +
+          entry.vendor +
+          '\n$' +
+          Number(
+            entry.amount
+          ).toFixed(2) +
+          '\n••••' +
+          entry.cardLast4
+        );
+
+      },
+      700
     );
 
   }
 );
 
 </script>
-<!-- SAFE CARD CHECKER CONNECTION TEST -->
+<!-- CARD CHECKER VOICE SAVE -->
 
 <iframe
-  name="cardCheckerTestFrame"
-  id="cardCheckerTestFrame"
+  name="voiceSaveFrame"
+  id="voiceSaveFrame"
   style="display:none;"
 ></iframe>
 
 <form
-  id="cardCheckerTestForm"
+  id="voiceSaveForm"
   method="POST"
-  target="cardCheckerTestFrame"
+  target="voiceSaveFrame"
   action="https://script.google.com/macros/s/AKfycbw4N_YCDBbpLPgn_rocHuJ6fx-L7CQOedwu1XCOaIxMEQ9Lv7JaDHMFUfN_4N3yXASR/exec"
   style="display:none;"
 >
-  <input
-    type="hidden"
-    name="action"
-    value="TEST_CONNECTION"
-  >
 
   <input
     type="hidden"
     name="pin"
-    id="cardCheckerTestPin"
+    id="voiceSavePin"
   >
+
+  <input
+    type="hidden"
+    name="purchaseDate"
+    id="voiceSaveDate"
+  >
+
+  <input
+    type="hidden"
+    name="vendor"
+    id="voiceSaveVendor"
+  >
+
+  <input
+    type="hidden"
+    name="amount"
+    id="voiceSaveAmount"
+  >
+
+  <input
+    type="hidden"
+    name="transactionType"
+    id="voiceSaveType"
+  >
+
+  <input
+    type="hidden"
+    name="cardLast4"
+    id="voiceSaveCard"
+  >
+
 </form>
-
-<button
-  type="button"
-  id="cardCheckerTestButton"
-  style="
-    display:block;
-    width:calc(100% - 36px);
-    max-width:484px;
-    margin:20px auto 40px;
-    padding:16px;
-    border:0;
-    border-radius:12px;
-    background:#555;
-    color:white;
-    font-size:18px;
-    font-weight:bold;
-    cursor:pointer;
-  "
->
-  🔗 Test Card Checker Connection
-</button>
-
-<script>
-
-function testCardCheckerConnection() {
-
-  const pin =
-    prompt(
-      'Enter your Voice Entry PIN:'
-    );
-
-  if (!pin) {
-    return;
-  }
-
-  document
-    .getElementById(
-      'cardCheckerTestPin'
-    )
-    .value =
-      pin.trim();
-
-  document
-    .getElementById(
-      'cardCheckerTestForm'
-    )
-    .submit();
-
-  alert(
-    'Connection test sent.\n\n' +
-    'Nothing was saved.'
-  );
-
-}
-
-
-document
-  .getElementById(
-    'cardCheckerTestButton'
-  )
-  .addEventListener(
-    'click',
-    testCardCheckerConnection
-  );
-
-</script>
-
 </body>
 </html>
