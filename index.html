@@ -813,7 +813,8 @@ function testCardCheckerConnection() {
 
 
 <button
-  onclick="testCardCheckerConnection()"
+  type="button"
+  id="cardCheckerTestButton"
   style="
     display:block;
     width:calc(100% - 36px);
@@ -826,9 +827,24 @@ function testCardCheckerConnection() {
     color:white;
     font-size:18px;
     font-weight:bold;
+    cursor:pointer;
+    position:relative;
+    z-index:9999;
+    pointer-events:auto;
   "
 >
   🔗 Test Card Checker Connection
 </button>
+
+<script>
+document
+  .getElementById(
+    'cardCheckerTestButton'
+  )
+  .addEventListener(
+    'click',
+    testCardCheckerConnection
+  );
+</script>
 </body>
 </html>
