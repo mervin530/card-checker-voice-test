@@ -744,8 +744,6 @@ confirmButton.addEventListener(
 );
 
 </script>
-<script>
-
 <!-- SAFE CARD CHECKER CONNECTION TEST -->
 
 <iframe
@@ -774,6 +772,26 @@ confirmButton.addEventListener(
   >
 </form>
 
+<button
+  type="button"
+  id="cardCheckerTestButton"
+  style="
+    display:block;
+    width:calc(100% - 36px);
+    max-width:484px;
+    margin:20px auto 40px;
+    padding:16px;
+    border:0;
+    border-radius:12px;
+    background:#555;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+  "
+>
+  🔗 Test Card Checker Connection
+</button>
 
 <script>
 
@@ -803,40 +821,12 @@ function testCardCheckerConnection() {
 
   alert(
     'Connection test sent.\n\n' +
-    'Nothing was saved.\n\n' +
-    'Next we will check the Apps Script execution log.'
+    'Nothing was saved.'
   );
 
 }
 
-</script>
 
-
-<button
-  type="button"
-  id="cardCheckerTestButton"
-  style="
-    display:block;
-    width:calc(100% - 36px);
-    max-width:484px;
-    margin:20px auto 40px;
-    padding:16px;
-    border:0;
-    border-radius:12px;
-    background:#555;
-    color:white;
-    font-size:18px;
-    font-weight:bold;
-    cursor:pointer;
-    position:relative;
-    z-index:9999;
-    pointer-events:auto;
-  "
->
-  🔗 Test Card Checker Connection
-</button>
-
-<script>
 document
   .getElementById(
     'cardCheckerTestButton'
@@ -845,6 +835,8 @@ document
     'click',
     testCardCheckerConnection
   );
+
 </script>
+
 </body>
 </html>
