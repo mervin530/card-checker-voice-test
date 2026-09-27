@@ -746,7 +746,38 @@ confirmButton.addEventListener(
 </script>
 <script>
 
-async function testCardCheckerConnection() {
+<!-- SAFE CARD CHECKER CONNECTION TEST -->
+
+<iframe
+  name="cardCheckerTestFrame"
+  id="cardCheckerTestFrame"
+  style="display:none;"
+></iframe>
+
+<form
+  id="cardCheckerTestForm"
+  method="POST"
+  target="cardCheckerTestFrame"
+  action="https://script.google.com/macros/s/AKfycbw4N_YCDBbpLPgn_rocHuJ6fx-L7CQOedwu1XCOaIxMEQ9Lv7JaDHMFUfN_4N3yXASR/exec"
+  style="display:none;"
+>
+  <input
+    type="hidden"
+    name="action"
+    value="TEST_CONNECTION"
+  >
+
+  <input
+    type="hidden"
+    name="pin"
+    id="cardCheckerTestPin"
+  >
+</form>
+
+
+<script>
+
+function testCardCheckerConnection() {
 
   const pin =
     prompt(
@@ -757,60 +788,24 @@ async function testCardCheckerConnection() {
     return;
   }
 
-  const endpoint =
-    'https://script.google.com/macros/s/AKfycbw4N_YCDBbpLPgn_rocHuJ6fx-L7CQOedwu1XCOaIxMEQ9Lv7JaDHMFUfN_4N3yXASR/exec';
+  document
+    .getElementById(
+      'cardCheckerTestPin'
+    )
+    .value =
+      pin.trim();
 
-  try {
+  document
+    .getElementById(
+      'cardCheckerTestForm'
+    )
+    .submit();
 
-    const response =
-      await fetch(
-        endpoint,
-        {
-          method: 'POST',
-
-          body: JSON.stringify({
-            action:
-              'TEST_CONNECTION',
-
-            pin:
-              pin
-          })
-        }
-      );
-
-    const result =
-      await response.json();
-
-    if (
-      result.success &&
-      result.connected
-    ) {
-
-      alert(
-        '✓ Connection successful!\n\n' +
-        'Nothing was saved.'
-      );
-
-    } else {
-
-      alert(
-        'Connection failed:\n\n' +
-        (
-          result.error ||
-          'Unknown error'
-        )
-      );
-
-    }
-
-  } catch (error) {
-
-    alert(
-      'Connection error:\n\n' +
-      error.message
-    );
-
-  }
+  alert(
+    'Connection test sent.\n\n' +
+    'Nothing was saved.\n\n' +
+    'Next we will check the Apps Script execution log.'
+  );
 
 }
 
