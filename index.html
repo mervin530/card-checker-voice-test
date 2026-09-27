@@ -142,6 +142,53 @@
       line-height: 1.5;
     }
 
+    .result-panel {
+      display: none;
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 14px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    .result-title {
+      font-size: 21px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .result-body {
+      font-size: 16px;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .result-actions button {
+      flex: 1;
+      padding: 14px 10px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .save-anyway {
+      background: #188038;
+      color: white;
+    }
+
+    .cancel-duplicate {
+      background: #e8eaed;
+      color: #202124;
+    }
+
   </style>
 
 </head>
@@ -288,6 +335,44 @@
   </button>
 
 
+  <div
+    id="resultPanel"
+    class="result-panel"
+  >
+    <div
+      id="resultTitle"
+      class="result-title"
+    ></div>
+
+    <div
+      id="resultBody"
+      class="result-body"
+    ></div>
+
+    <div
+      id="duplicateActions"
+      class="result-actions"
+      style="display:none;"
+    >
+      <button
+        id="cancelDuplicateButton"
+        class="cancel-duplicate"
+        type="button"
+      >
+        Cancel
+      </button>
+
+      <button
+        id="saveAnywayButton"
+        class="save-anyway"
+        type="button"
+      >
+        Save Anyway
+      </button>
+    </div>
+  </div>
+
+
   <div class="hint">
 
     Try saying:
@@ -432,21 +517,18 @@ if (!SpeechRecognition) {
 
 
       try {
-
-
-        recognition.start();
-
+                recognition.start();
 
       } catch (error) {
 
-
         status.textContent =
-          'Could not start microphone: ' +
-          error.message;
+          'Could not start microphone.';
 
+        micButton.classList.remove(
+          'listening'
+        );
 
       }
-
 
     }
   );
@@ -458,7 +540,9 @@ if (!SpeechRecognition) {
 
 
       const transcript =
-        event.results[0][0].transcript;
+        event.results[0][0]
+          .transcript
+          .trim();
 
 
       speechText.textContent =
@@ -468,7 +552,6 @@ if (!SpeechRecognition) {
       parseVoiceEntry(
         transcript
       );
-
 
     };
 
@@ -483,6 +566,10 @@ if (!SpeechRecognition) {
         event.error;
 
 
+      micButton.classList.remove(
+        'listening'
+      );
+
     };
 
 
@@ -495,6 +582,16 @@ if (!SpeechRecognition) {
         'listening'
       );
 
+
+      if (
+        status.textContent ===
+        'Listening...'
+      ) {
+
+        status.textContent =
+          'Nothing heard. Try again.';
+
+      }
 
     };
 
@@ -518,7 +615,7 @@ function parseVoiceEntry(
     ).trim();
 
 
-  const text =
+  const lower =
     original.toLowerCase();
 
 
@@ -532,14 +629,16 @@ function parseVoiceEntry(
 
 
   if (
-    text.includes('refund') ||
-    text.includes('return')
+    lower.includes(
+      'refund'
+    ) ||
+    lower.includes(
+      'return'
+    )
   ) {
-
 
     transactionType =
       'REFUND';
-
 
   }
 
@@ -559,9 +658,15 @@ function parseVoiceEntry(
 
 
   if (
-    text.includes('food card') ||
-    text.includes('food mastercard') ||
-    text.includes('9726')
+    lower.includes(
+      'food card'
+    ) ||
+    lower.includes(
+      'food mastercard'
+    ) ||
+    lower.includes(
+      '9726'
+    )
   ) {
 
 
@@ -573,13 +678,16 @@ function parseVoiceEntry(
       'Food ••••9726';
 
 
-  }
-
-
-  else if (
-    text.includes('mastercard') ||
-    text.includes('main card') ||
-    text.includes('3336')
+  } else if (
+    lower.includes(
+      'main card'
+    ) ||
+    lower.includes(
+      'mastercard'
+    ) ||
+    lower.includes(
+      '3336'
+    )
   ) {
 
 
@@ -941,11 +1049,6 @@ function parseSpokenDate(
     );
 
 
-  const lower =
-    original.toLowerCase();
-
-
-
   /**********************************************************
    * TODAY
    **********************************************************/
@@ -962,6 +1065,7 @@ function parseSpokenDate(
 
 
     return {
+
       date:
         formatLocalDate(
           date
@@ -971,6 +1075,7 @@ function parseSpokenDate(
         /\btoday\b/i.exec(
           original
         )[0]
+
     };
 
 
@@ -999,6 +1104,7 @@ function parseSpokenDate(
 
 
     return {
+
       date:
         formatLocalDate(
           date
@@ -1008,6 +1114,7 @@ function parseSpokenDate(
         /\byesterday\b/i.exec(
           original
         )[0]
+
     };
 
 
@@ -1062,7 +1169,7 @@ function parseSpokenDate(
 
 
   /**********************************************************
-   * EXAMPLE:
+   * EXAMPLES:
    *
    * September 25
    * September 25th
@@ -1222,27 +1329,315 @@ function formatLocalDate(
  * CONFIRM & SAVE
  ************************************************************/
 
+const resultPanel =
+  document.getElementById(
+    'resultPanel'
+  );
+
+
+const resultTitle =
+  document.getElementById(
+    'resultTitle'
+  );
+
+
+const resultBody =
+  document.getElementById(
+    'resultBody'
+  );
+
+
+const duplicateActions =
+  document.getElementById(
+    'duplicateActions'
+  );
+
+
+const saveAnywayButton =
+  document.getElementById(
+    'saveAnywayButton'
+  );
+
+
+const cancelDuplicateButton =
+  document.getElementById(
+    'cancelDuplicateButton'
+  );
+
+
+let activeVoiceNonce =
+  '';
+
+
+let pendingDuplicateEntry =
+  null;
+
+
 confirmButton.addEventListener(
   'click',
   function() {
 
 
-    const entry =
-      window.voiceEntryTest;
+    submitVoiceEntry(
+      false
+    );
 
+
+  }
+);
+
+
+/************************************************************
+ * SUBMIT VOICE ENTRY
+ ************************************************************/
+
+function submitVoiceEntry(
+  allowDuplicate
+) {
+
+
+  const entry =
+    window.voiceEntryTest;
+
+
+  if (
+    !entry ||
+    !entry.vendor ||
+    !entry.amount ||
+    !entry.cardLast4 ||
+    !entry.purchaseDate
+  ) {
+
+
+    alert(
+      'Voice Entry information is incomplete.'
+    );
+
+
+    return;
+
+
+  }
+
+
+  /**********************************************************
+   * GET SAVED PIN OR ASK ON FIRST USE
+   **********************************************************/
+
+  let pin =
+    localStorage.getItem(
+      'cardCheckerVoicePin'
+    );
+
+
+  if (!pin) {
+
+
+    pin =
+      prompt(
+        'Enter your Voice Entry PIN:'
+      );
+
+
+    if (!pin) {
+      return;
+    }
+
+
+    pin =
+      pin.trim();
+
+
+    localStorage.setItem(
+      'cardCheckerVoicePin',
+      pin
+    );
+
+
+  }
+
+
+  /**********************************************************
+   * CREATE REQUEST NONCE
+   **********************************************************/
+
+  activeVoiceNonce =
+    createVoiceNonce();
+
+
+  /**********************************************************
+   * COPY DATA INTO HIDDEN FORM
+   **********************************************************/
+
+  document
+    .getElementById(
+      'voiceSavePin'
+    )
+    .value =
+      pin;
+
+
+  document
+    .getElementById(
+      'voiceSaveDate'
+    )
+    .value =
+      entry.purchaseDate;
+
+
+  document
+    .getElementById(
+      'voiceSaveVendor'
+    )
+    .value =
+      entry.vendor;
+
+
+  document
+    .getElementById(
+      'voiceSaveAmount'
+    )
+    .value =
+      entry.amount;
+
+
+  document
+    .getElementById(
+      'voiceSaveType'
+    )
+    .value =
+      entry.transactionType;
+
+
+  document
+    .getElementById(
+      'voiceSaveCard'
+    )
+    .value =
+      entry.cardLast4;
+
+
+  document
+    .getElementById(
+      'voiceSaveNonce'
+    )
+    .value =
+      activeVoiceNonce;
+
+
+  document
+    .getElementById(
+      'voiceSaveAllowDuplicate'
+    )
+    .value =
+      allowDuplicate
+        ? 'true'
+        : 'false';
+
+
+  /**********************************************************
+   * SEND TO CARD CHECKER
+   **********************************************************/
+
+  status.textContent =
+    allowDuplicate
+      ? 'Saving duplicate entry...'
+      : 'Saving...';
+
+
+  confirmButton.disabled =
+    true;
+
+
+  saveAnywayButton.disabled =
+    true;
+
+
+  duplicateActions.style.display =
+    'none';
+
+
+  resultPanel.style.display =
+    'none';
+
+
+  document
+    .getElementById(
+      'voiceSaveForm'
+    )
+    .submit();
+
+
+}
+  /************************************************************
+ * RECEIVE REAL BACKEND RESULT
+ ************************************************************/
+
+window.addEventListener(
+  'message',
+  function(event) {
+
+
+    const data =
+      event.data;
 
 
     if (
-      !entry ||
-      !entry.vendor ||
-      !entry.amount ||
-      !entry.cardLast4 ||
-      !entry.purchaseDate
+      !data ||
+      typeof data !== 'object'
+    ) {
+
+      return;
+
+    }
+
+
+    /********************************************************
+     * ONLY ACCEPT RESPONSE FOR CURRENT REQUEST
+     ********************************************************/
+
+    if (
+      !activeVoiceNonce ||
+      data.nonce !== activeVoiceNonce
+    ) {
+
+      return;
+
+    }
+
+
+    /********************************************************
+     * CONSUME NONCE
+     *
+     * Prevent the same iframe response from being handled
+     * more than once.
+     ********************************************************/
+
+    activeVoiceNonce =
+      '';
+
+
+    confirmButton.disabled =
+      false;
+
+
+    saveAnywayButton.disabled =
+      false;
+
+
+
+    /********************************************************
+     * DUPLICATE
+     ********************************************************/
+
+    if (
+      data.status === 'DUPLICATE' ||
+      data.isDuplicate === true
     ) {
 
 
-      alert(
-        'Voice Entry information is incomplete.'
+      showDuplicateResult(
+        data
       );
 
 
@@ -1254,38 +1649,22 @@ confirmButton.addEventListener(
 
 
     /********************************************************
-     * GET SAVED PIN OR ASK ON FIRST USE
+     * SAVED
      ********************************************************/
 
-    let pin =
-      localStorage.getItem(
-        'cardCheckerVoicePin'
+    if (
+      data.success === true &&
+      data.saved === true &&
+      data.status === 'SAVED'
+    ) {
+
+
+      showSavedResult(
+        data
       );
 
 
-
-    if (!pin) {
-
-
-      pin =
-        prompt(
-          'Enter your Voice Entry PIN:'
-        );
-
-
-      if (!pin) {
-        return;
-      }
-
-
-      pin =
-        pin.trim();
-
-
-      localStorage.setItem(
-        'cardCheckerVoicePin',
-        pin
-      );
+      return;
 
 
     }
@@ -1293,120 +1672,13 @@ confirmButton.addEventListener(
 
 
     /********************************************************
-     * COPY DATA INTO HIDDEN FORM
+     * ERROR
      ********************************************************/
 
-    document
-      .getElementById(
-        'voiceSavePin'
-      )
-      .value =
-        pin;
-
-
-
-    document
-      .getElementById(
-        'voiceSaveDate'
-      )
-      .value =
-        entry.purchaseDate;
-
-
-
-    document
-      .getElementById(
-        'voiceSaveVendor'
-      )
-      .value =
-        entry.vendor;
-
-
-
-    document
-      .getElementById(
-        'voiceSaveAmount'
-      )
-      .value =
-        entry.amount;
-
-
-
-    document
-      .getElementById(
-        'voiceSaveType'
-      )
-      .value =
-        entry.transactionType;
-
-
-
-    document
-      .getElementById(
-        'voiceSaveCard'
-      )
-      .value =
-        entry.cardLast4;
-
-
-
-    /********************************************************
-     * SEND TO CARD CHECKER
-     ********************************************************/
-
-    status.textContent =
-      'Saving...';
-
-
-    confirmButton.disabled =
-      true;
-
-
-
-    document
-      .getElementById(
-        'voiceSaveForm'
-      )
-      .submit();
-
-
-
-    /********************************************************
-     * CURRENT TEMPORARY CONFIRMATION
-     *
-     * Update 3 will replace this with a true backend
-     * confirmation containing QE number and match status.
-     ********************************************************/
-
-    setTimeout(
-      function() {
-
-
-        status.textContent =
-          '✓ Entry sent to Card Checker';
-
-
-        confirmButton.disabled =
-          false;
-
-
-
-        alert(
-          '✓ Voice Entry sent!\n\n' +
-          entry.vendor +
-          '\n$' +
-          Number(
-            entry.amount
-          ).toFixed(2) +
-          '\n' +
-          entry.purchaseDate +
-          '\n••••' +
-          entry.cardLast4
-        );
-
-
-      },
-      700
+    showVoiceError(
+      data.error ||
+      data.message ||
+      'Unable to save Voice Entry.'
     );
 
 
@@ -1414,6 +1686,657 @@ confirmButton.addEventListener(
 );
 
 
+
+/************************************************************
+ * DISPLAY SAVED RESULT
+ ************************************************************/
+
+function showSavedResult(
+  data
+) {
+
+
+  pendingDuplicateEntry =
+    null;
+
+
+  status.textContent =
+    '✓ Saved successfully';
+
+
+  resultTitle.textContent =
+    '✅ Saved Successfully';
+
+
+  const lines =
+    [];
+
+
+  /**********************************************************
+   * QUICK ENTRY NUMBER
+   **********************************************************/
+
+  if (
+    data.entryId
+  ) {
+
+
+    lines.push(
+      data.entryId
+    );
+
+
+  }
+
+
+
+  /**********************************************************
+   * VENDOR + AMOUNT
+   **********************************************************/
+
+  lines.push(
+
+    String(
+      data.vendor || ''
+    ) +
+
+    ' — $' +
+
+    Number(
+      data.amount || 0
+    ).toFixed(2)
+
+  );
+
+
+
+  /**********************************************************
+   * DATE
+   **********************************************************/
+
+  lines.push(
+
+    formatDisplayDate(
+      data.purchaseDate
+    )
+
+  );
+
+
+
+  /**********************************************************
+   * CARD
+   **********************************************************/
+
+  lines.push(
+
+    getCardDisplayName(
+      data.cardLast4
+    )
+
+  );
+
+
+
+  /**********************************************************
+   * MATCH STATUS
+   **********************************************************/
+
+  if (
+    data.matchStatus
+  ) {
+
+
+    lines.push(
+
+      'Statement: ' +
+
+      formatMatchStatus(
+        data.matchStatus
+      )
+
+    );
+
+
+  }
+
+
+
+  /**********************************************************
+   * MATCHED TRANSACTION
+   **********************************************************/
+
+  if (
+    data.matchedTransactionId
+  ) {
+
+
+    lines.push(
+
+      'Matched: ' +
+      data.matchedTransactionId
+
+    );
+
+
+  }
+
+
+
+  /**********************************************************
+   * CONFIDENCE
+   **********************************************************/
+
+  if (
+    data.confidence !== '' &&
+    data.confidence !== null &&
+    data.confidence !== undefined
+  ) {
+
+
+    lines.push(
+
+      'Confidence: ' +
+      data.confidence +
+      '%'
+
+    );
+
+
+  }
+
+
+
+  resultBody.textContent =
+    lines.join(
+      '\n'
+    );
+
+
+  duplicateActions.style.display =
+    'none';
+
+
+  resultPanel.style.display =
+    'block';
+
+
+}
+
+
+
+/************************************************************
+ * DISPLAY DUPLICATE RESULT
+ ************************************************************/
+
+function showDuplicateResult(
+  data
+) {
+
+
+  pendingDuplicateEntry =
+    data.duplicate ||
+    null;
+
+
+  status.textContent =
+    '⚠ Possible duplicate';
+
+
+  resultTitle.textContent =
+    '⚠️ Possible Duplicate';
+
+
+
+  const duplicate =
+    data.duplicate ||
+    {};
+
+
+  const lines =
+    [];
+
+
+
+  /**********************************************************
+   * EXISTING QUICK ENTRY NUMBER
+   **********************************************************/
+
+  if (
+    duplicate.entryId
+  ) {
+
+
+    lines.push(
+
+      'Already entered as ' +
+      duplicate.entryId
+
+    );
+
+
+  }
+
+
+
+  /**********************************************************
+   * VENDOR + AMOUNT
+   **********************************************************/
+
+  lines.push(
+
+    String(
+
+      duplicate.vendor ||
+
+      (
+        window.voiceEntryTest
+          ? window.voiceEntryTest.vendor
+          : ''
+      )
+
+    ) +
+
+    ' — $' +
+
+    Number(
+
+      duplicate.amount ||
+
+      (
+        window.voiceEntryTest
+          ? window.voiceEntryTest.amount
+          : 0
+      )
+
+    ).toFixed(2)
+
+  );
+
+
+
+  /**********************************************************
+   * DATE
+   **********************************************************/
+
+  lines.push(
+
+    formatDisplayDate(
+
+      duplicate.purchaseDate ||
+
+      (
+        window.voiceEntryTest
+          ? window.voiceEntryTest.purchaseDate
+          : ''
+      )
+
+    )
+
+  );
+
+
+
+  /**********************************************************
+   * CARD
+   **********************************************************/
+
+  lines.push(
+
+    getCardDisplayName(
+
+      duplicate.cardLast4 ||
+
+      (
+        window.voiceEntryTest
+          ? window.voiceEntryTest.cardLast4
+          : ''
+      )
+
+    )
+
+  );
+
+
+
+  resultBody.textContent =
+    lines.join(
+      '\n'
+    );
+
+
+  duplicateActions.style.display =
+    'flex';
+
+
+  resultPanel.style.display =
+    'block';
+
+
+}
+
+
+
+/************************************************************
+ * SAVE ANYWAY
+ ************************************************************/
+
+saveAnywayButton.addEventListener(
+  'click',
+  function() {
+
+
+    if (
+      !pendingDuplicateEntry
+    ) {
+
+      return;
+
+    }
+
+
+    submitVoiceEntry(
+      true
+    );
+
+
+  }
+);
+
+
+
+/************************************************************
+ * CANCEL DUPLICATE
+ ************************************************************/
+
+cancelDuplicateButton.addEventListener(
+  'click',
+  function() {
+
+
+    pendingDuplicateEntry =
+      null;
+
+
+    duplicateActions.style.display =
+      'none';
+
+
+    resultPanel.style.display =
+      'none';
+
+
+    status.textContent =
+      'Duplicate not saved';
+
+
+    confirmButton.disabled =
+      false;
+
+
+  }
+);
+
+
+
+/************************************************************
+ * DISPLAY ERROR
+ ************************************************************/
+
+function showVoiceError(
+  message
+) {
+
+
+  status.textContent =
+    '✕ Save failed';
+
+
+  resultTitle.textContent =
+    '❌ Unable to Save';
+
+
+  resultBody.textContent =
+    String(
+
+      message ||
+      'Unable to save Voice Entry.'
+
+    );
+
+
+  duplicateActions.style.display =
+    'none';
+
+
+  resultPanel.style.display =
+    'block';
+
+
+}
+
+
+
+/************************************************************
+ * NONCE
+ ************************************************************/
+
+function createVoiceNonce() {
+
+
+  return (
+
+    'voice_' +
+
+    Date.now() +
+
+    '_' +
+
+    Math.random()
+      .toString(36)
+      .slice(2)
+
+  );
+
+
+}
+
+
+
+/************************************************************
+ * CARD DISPLAY NAME
+ ************************************************************/
+
+function getCardDisplayName(
+  last4
+) {
+
+
+  const value =
+    String(
+      last4 || ''
+    );
+
+
+  if (
+    value === '9726'
+  ) {
+
+
+    return (
+      'Food ••••9726'
+    );
+
+
+  }
+
+
+  if (
+    value === '3336'
+  ) {
+
+
+    return (
+      'Costco Mastercard ••••3336'
+    );
+
+
+  }
+
+
+  if (
+    value === '8386'
+  ) {
+
+
+    return (
+      'Costco Mastercard ••••8386'
+    );
+
+
+  }
+
+
+  return (
+    'Card ••••' +
+    value
+  );
+
+
+}
+
+
+
+/************************************************************
+ * MATCH STATUS DISPLAY
+ ************************************************************/
+
+function formatMatchStatus(
+  value
+) {
+
+
+  const statusValue =
+    String(
+      value || ''
+    )
+      .trim()
+      .toUpperCase();
+
+
+  if (
+    statusValue === 'MATCHED'
+  ) {
+
+    return 'Matched';
+
+  }
+
+
+  if (
+    statusValue === 'POSSIBLE_MATCH'
+  ) {
+
+    return 'Possible Match';
+
+  }
+
+
+  if (
+    statusValue === 'UNMATCHED'
+  ) {
+
+    return 'Unmatched';
+
+  }
+
+
+  if (
+    statusValue === 'REVIEW'
+  ) {
+
+    return 'Review';
+
+  }
+
+
+  return (
+    statusValue ||
+    'Unmatched'
+  );
+
+
+}
+
+
+
+/************************************************************
+ * DISPLAY DATE
+ ************************************************************/
+
+function formatDisplayDate(
+  value
+) {
+
+
+  const text =
+    String(
+      value || ''
+    ).trim();
+
+
+  const match =
+    text.match(
+      /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/
+    );
+
+
+  if (
+    !match
+  ) {
+
+    return text;
+
+  }
+
+
+  const date =
+    new Date(
+
+      Number(
+        match[1]
+      ),
+
+      Number(
+        match[2]
+      ) - 1,
+
+      Number(
+        match[3]
+      )
+
+    );
+
+
+  return date.toLocaleDateString(
+    'en-CA',
+    {
+
+      year:
+        'numeric',
+
+      month:
+        'long',
+
+      day:
+        'numeric'
+
+    }
+  );
+
+
+}
+  
 </script>
 
 
@@ -1477,6 +2400,21 @@ confirmButton.addEventListener(
     type="hidden"
     name="cardLast4"
     id="voiceSaveCard"
+  >
+
+
+  <input
+    type="hidden"
+    name="nonce"
+    id="voiceSaveNonce"
+  >
+
+
+  <input
+    type="hidden"
+    name="allowDuplicate"
+    id="voiceSaveAllowDuplicate"
+    value="false"
   >
 
 
