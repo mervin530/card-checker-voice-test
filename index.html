@@ -11,6 +11,7 @@
   <title>Card Checker Voice Entry</title>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -128,6 +129,10 @@
       font-weight: bold;
     }
 
+    .confirm:disabled {
+      opacity: 0.65;
+    }
+
     .hint {
       margin-top: 22px;
       padding: 16px;
@@ -136,7 +141,9 @@
       font-size: 15px;
       line-height: 1.5;
     }
+
   </style>
+
 </head>
 
 <body>
@@ -149,6 +156,7 @@
     Card Checker
   </div>
 
+
   <button
     id="micButton"
     class="mic"
@@ -156,6 +164,7 @@
   >
     🎤
   </button>
+
 
   <div id="status">
     Tap the microphone
@@ -181,6 +190,7 @@
   >
 
     <div class="row">
+
       <div class="field-label">
         Vendor
       </div>
@@ -191,10 +201,12 @@
       >
         —
       </div>
+
     </div>
 
 
     <div class="row">
+
       <div class="field-label">
         Amount
       </div>
@@ -205,10 +217,12 @@
       >
         —
       </div>
+
     </div>
 
 
     <div class="row">
+
       <div class="field-label">
         Date
       </div>
@@ -219,10 +233,12 @@
       >
         —
       </div>
+
     </div>
 
 
     <div class="row">
+
       <div class="field-label">
         Type
       </div>
@@ -233,10 +249,12 @@
       >
         —
       </div>
+
     </div>
 
 
     <div class="row">
+
       <div class="field-label">
         Card
       </div>
@@ -247,6 +265,7 @@
       >
         —
       </div>
+
     </div>
 
   </div>
@@ -296,19 +315,29 @@ const SpeechRecognition =
 
 
 const micButton =
-  document.getElementById('micButton');
+  document.getElementById(
+    'micButton'
+  );
 
 const status =
-  document.getElementById('status');
+  document.getElementById(
+    'status'
+  );
 
 const speechText =
-  document.getElementById('speechText');
+  document.getElementById(
+    'speechText'
+  );
 
 const details =
-  document.getElementById('details');
+  document.getElementById(
+    'details'
+  );
 
 const confirmButton =
-  document.getElementById('confirmButton');
+  document.getElementById(
+    'confirmButton'
+  );
 
 
 if (!SpeechRecognition) {
@@ -316,12 +345,14 @@ if (!SpeechRecognition) {
   status.textContent =
     'Speech recognition is not supported in this browser.';
 
-  micButton.disabled = true;
+  micButton.disabled =
+    true;
 
 } else {
 
   const recognition =
     new SpeechRecognition();
+
 
   recognition.lang =
     'en-CA';
@@ -356,6 +387,7 @@ if (!SpeechRecognition) {
         'listening'
       );
 
+
       try {
 
         recognition.start();
@@ -378,8 +410,10 @@ if (!SpeechRecognition) {
       const transcript =
         event.results[0][0].transcript;
 
+
       speechText.textContent =
         transcript;
+
 
       parseVoiceEntry(
         transcript
@@ -414,10 +448,15 @@ if (!SpeechRecognition) {
  * PARSE VOICE ENTRY
  ************************************************************/
 
-function parseVoiceEntry(transcript) {
+function parseVoiceEntry(
+  transcript
+) {
 
   const original =
-    String(transcript || '').trim();
+    String(
+      transcript || ''
+    ).trim();
+
 
   const text =
     original.toLowerCase();
@@ -430,12 +469,15 @@ function parseVoiceEntry(transcript) {
   let transactionType =
     'PURCHASE';
 
+
   if (
     text.includes('refund') ||
     text.includes('return')
   ) {
+
     transactionType =
       'REFUND';
+
   }
 
 
@@ -481,20 +523,17 @@ function parseVoiceEntry(transcript) {
 
   /**********************************************************
    * AMOUNT
-   *
-   * Handles:
-   * $52.80
-   * 52.80
-   * $25
    **********************************************************/
 
   let amount =
     null;
 
+
   const moneyMatch =
     original.match(
       /\$\s*([0-9]+(?:\.[0-9]{1,2})?)/
     );
+
 
   if (moneyMatch) {
 
@@ -509,6 +548,7 @@ function parseVoiceEntry(transcript) {
       original.match(
         /\b([0-9]+\.[0-9]{1,2})\b/
       );
+
 
     if (decimalMatch) {
 
@@ -525,25 +565,34 @@ function parseVoiceEntry(transcript) {
   /**********************************************************
    * DATE
    *
-   * Version 1:
-   * Default to today.
+   * Current version defaults to today.
    **********************************************************/
 
   const today =
     new Date();
 
+
   const year =
     today.getFullYear();
+
 
   const month =
     String(
       today.getMonth() + 1
-    ).padStart(2, '0');
+    ).padStart(
+      2,
+      '0'
+    );
+
 
   const day =
     String(
       today.getDate()
-    ).padStart(2, '0');
+    ).padStart(
+      2,
+      '0'
+    );
+
 
   const purchaseDate =
     year +
@@ -560,11 +609,13 @@ function parseVoiceEntry(transcript) {
   let vendor =
     original;
 
+
   vendor =
     vendor.replace(
       /\$\s*[0-9]+(?:\.[0-9]{1,2})?/g,
       ''
     );
+
 
   vendor =
     vendor.replace(
@@ -572,11 +623,13 @@ function parseVoiceEntry(transcript) {
       ' '
     );
 
+
   vendor =
     vendor.replace(
       /\b(food card|food mastercard|main card|mastercard)\b/gi,
       ' '
     );
+
 
   vendor =
     vendor.replace(
@@ -584,11 +637,13 @@ function parseVoiceEntry(transcript) {
       ' '
     );
 
+
   vendor =
     vendor.replace(
       /[,]+/g,
       ' '
     );
+
 
   vendor =
     vendor.replace(
@@ -606,18 +661,20 @@ function parseVoiceEntry(transcript) {
     vendor =
       vendor
         .split(' ')
-        .map(function(word) {
+        .map(
+          function(word) {
 
-          if (!word) {
-            return '';
+            if (!word) {
+              return '';
+            }
+
+            return (
+              word.charAt(0).toUpperCase() +
+              word.slice(1)
+            );
+
           }
-
-          return (
-            word.charAt(0).toUpperCase() +
-            word.slice(1)
-          );
-
-        })
+        )
         .join(' ');
 
   }
@@ -628,33 +685,45 @@ function parseVoiceEntry(transcript) {
    **********************************************************/
 
   document
-    .getElementById('vendor')
+    .getElementById(
+      'vendor'
+    )
     .textContent =
-      vendor || 'Not recognized';
+      vendor ||
+      'Not recognized';
 
 
   document
-    .getElementById('amount')
+    .getElementById(
+      'amount'
+    )
     .textContent =
       amount !== null
-        ? '$' + amount.toFixed(2)
+        ? '$' +
+          amount.toFixed(2)
         : 'Not recognized';
 
 
   document
-    .getElementById('date')
+    .getElementById(
+      'date'
+    )
     .textContent =
       purchaseDate;
 
 
   document
-    .getElementById('type')
+    .getElementById(
+      'type'
+    )
     .textContent =
       transactionType;
 
 
   document
-    .getElementById('card')
+    .getElementById(
+      'card'
+    )
     .textContent =
       cardName;
 
@@ -694,9 +763,7 @@ function parseVoiceEntry(transcript) {
 
 
   /**********************************************************
-   * TEST DATA
-   *
-   * We are NOT sending this anywhere yet.
+   * STORE PARSED ENTRY
    **********************************************************/
 
   window.voiceEntryTest = {
@@ -722,7 +789,14 @@ function parseVoiceEntry(transcript) {
 
 
 /************************************************************
- * CONFIRM & SAVE
+ * CONFIRM
+ *
+ * IMPORTANT:
+ * The hidden form below is currently configured for
+ * TEST_VOICE_PAYLOAD.
+ *
+ * Apps Script will receive and log the information,
+ * but it WILL NOT save a Quick Entry.
  ************************************************************/
 
 confirmButton.addEventListener(
@@ -731,6 +805,7 @@ confirmButton.addEventListener(
 
     const entry =
       window.voiceEntryTest;
+
 
     if (
       !entry ||
@@ -744,6 +819,7 @@ confirmButton.addEventListener(
       );
 
       return;
+
     }
 
 
@@ -764,12 +840,15 @@ confirmButton.addEventListener(
           'Enter your Voice Entry PIN:'
         );
 
+
       if (!pin) {
         return;
       }
 
+
       pin =
         pin.trim();
+
 
       localStorage.setItem(
         'cardCheckerVoicePin',
@@ -790,12 +869,14 @@ confirmButton.addEventListener(
       .value =
         pin;
 
+
     document
       .getElementById(
         'voiceSaveDate'
       )
       .value =
         entry.purchaseDate;
+
 
     document
       .getElementById(
@@ -804,6 +885,7 @@ confirmButton.addEventListener(
       .value =
         entry.vendor;
 
+
     document
       .getElementById(
         'voiceSaveAmount'
@@ -811,12 +893,14 @@ confirmButton.addEventListener(
       .value =
         entry.amount;
 
+
     document
       .getElementById(
         'voiceSaveType'
       )
       .value =
         entry.transactionType;
+
 
     document
       .getElementById(
@@ -827,11 +911,12 @@ confirmButton.addEventListener(
 
 
     /********************************************************
-     * SEND TO CARD CHECKER
+     * SEND SAFE TEST
      ********************************************************/
 
     status.textContent =
-      'Saving...';
+      'Testing connection...';
+
 
     confirmButton.disabled =
       true;
@@ -848,20 +933,22 @@ confirmButton.addEventListener(
       function() {
 
         status.textContent =
-          '✓ Entry sent to Card Checker';
+          '✓ Test payload sent';
 
         confirmButton.disabled =
           false;
 
+
         alert(
-          '✓ Voice Entry sent!\n\n' +
+          '✓ Test sent!\n\n' +
           entry.vendor +
           '\n$' +
           Number(
             entry.amount
           ).toFixed(2) +
           '\n••••' +
-          entry.cardLast4
+          entry.cardLast4 +
+          '\n\nNothing was saved.'
         );
 
       },
@@ -872,7 +959,15 @@ confirmButton.addEventListener(
 );
 
 </script>
-<!-- CARD CHECKER VOICE SAVE -->
+
+
+<!--
+  CARD CHECKER VOICE FORM
+
+  TEMPORARY SAFE TEST MODE.
+  TEST_VOICE_PAYLOAD prevents saveQuickEntry()
+  from being called.
+-->
 
 <iframe
   name="voiceSaveFrame"
@@ -880,12 +975,8 @@ confirmButton.addEventListener(
   style="display:none;"
 ></iframe>
 
+
 <form
-<input
-  type="hidden"
-  name="action"
-  value="TEST_VOICE_PAYLOAD"
->  
   id="voiceSaveForm"
   method="POST"
   target="voiceSaveFrame"
@@ -895,9 +986,17 @@ confirmButton.addEventListener(
 
   <input
     type="hidden"
+    name="action"
+    value="TEST_VOICE_PAYLOAD"
+  >
+
+
+  <input
+    type="hidden"
     name="pin"
     id="voiceSavePin"
   >
+
 
   <input
     type="hidden"
@@ -905,11 +1004,13 @@ confirmButton.addEventListener(
     id="voiceSaveDate"
   >
 
+
   <input
     type="hidden"
     name="vendor"
     id="voiceSaveVendor"
   >
+
 
   <input
     type="hidden"
@@ -917,11 +1018,13 @@ confirmButton.addEventListener(
     id="voiceSaveAmount"
   >
 
+
   <input
     type="hidden"
     name="transactionType"
     id="voiceSaveType"
   >
+
 
   <input
     type="hidden"
@@ -930,5 +1033,6 @@ confirmButton.addEventListener(
   >
 
 </form>
+
 </body>
 </html>
