@@ -744,6 +744,96 @@ confirmButton.addEventListener(
 );
 
 </script>
+<script>
 
+async function testCardCheckerConnection() {
+
+  const pin =
+    prompt(
+      'Enter your Voice Entry PIN:'
+    );
+
+  if (!pin) {
+    return;
+  }
+
+  const endpoint =
+    'https://script.google.com/macros/s/AKfycbw4N_YCDBbpLPgn_rocHuJ6fx-L7CQOedwu1XCOaIxMEQ9Lv7JaDHMFUfN_4N3yXASR/exec';
+
+  try {
+
+    const response =
+      await fetch(
+        endpoint,
+        {
+          method: 'POST',
+
+          body: JSON.stringify({
+            action:
+              'TEST_CONNECTION',
+
+            pin:
+              pin
+          })
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (
+      result.success &&
+      result.connected
+    ) {
+
+      alert(
+        '✓ Connection successful!\n\n' +
+        'Nothing was saved.'
+      );
+
+    } else {
+
+      alert(
+        'Connection failed:\n\n' +
+        (
+          result.error ||
+          'Unknown error'
+        )
+      );
+
+    }
+
+  } catch (error) {
+
+    alert(
+      'Connection error:\n\n' +
+      error.message
+    );
+
+  }
+
+}
+
+</script>
+
+
+<button
+  onclick="testCardCheckerConnection()"
+  style="
+    display:block;
+    width:calc(100% - 36px);
+    max-width:484px;
+    margin:20px auto 40px;
+    padding:16px;
+    border:0;
+    border-radius:12px;
+    background:#555;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+  "
+>
+  🔗 Test Card Checker Connection
+</button>
 </body>
 </html>
